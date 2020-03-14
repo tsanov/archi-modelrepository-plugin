@@ -21,7 +21,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMLResourceImpl;
-import org.eclipse.gef.commands.CommandStack;
 
 import com.archimatetool.editor.model.IArchiveManager;
 import com.archimatetool.editor.model.compatibility.CompatibilityHandlerException;
@@ -141,14 +140,10 @@ public class GraficoModelImporter {
     	// We now have to remove the Eobject from its Resource so it can be saved in its proper *.archimate format
         resource.getContents().remove(fModel);
         
-        // Add Archive Manager and CommandStack so we can save the model
+        // Add Archive Manager so we can save the model
         IArchiveManager archiveManager = IArchiveManager.FACTORY.createArchiveManager(fModel);
         fModel.setAdapter(IArchiveManager.class, archiveManager);
         
-        // TODO: After Archi 4.7 we don't need a CommandStack
-        CommandStack cmdStack = new CommandStack();
-        fModel.setAdapter(CommandStack.class, cmdStack);
-    	
     	// Load images
     	loadImages(imagesFolder, archiveManager);
 
@@ -166,14 +161,11 @@ public class GraficoModelImporter {
      * Read images from images subfolder and load them into the model
      */
     private void loadImages(File folder, IArchiveManager archiveManager) throws IOException {
-        byte[] bytes;
-
         // Add all images files
         for(File imageFile : folder.listFiles()) {
             if(imageFile.isFile()) {
-                bytes = Files.readAllBytes(imageFile.toPath());
-                // /!\ This must match the prefix used in
-                // ArchiveManager.createArchiveImagePathname
+                byte[] bytes = Files.readAllBytes(imageFile.toPath());
+                // This must match the prefix used in ArchiveManager.createArchiveImagePathname()
                 archiveManager.addByteContentEntry("images/" + imageFile.getName(), bytes); //$NON-NLS-1$
             }
         }
